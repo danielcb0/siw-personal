@@ -14,9 +14,14 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.List;
 
+/**
+ * Implementation of the TransactionRepository interface.
+ * Provides methods for CRUD operations on transactions in the database.
+ */
 @Repository
 public class TransactionRepositoryImpl implements TransactionRepository {
 
+    // SQL queries
     private static final String SQL_FIND_ALL = "SELECT TRANSACTION_ID, CATEGORY_ID, USER_ID, AMOUNT, NOTE, TRANSACTION_DATE FROM ET_TRANSACTIONS WHERE USER_ID = ? AND CATEGORY_ID = ?";
     private static final String SQL_FIND_BY_ID = "SELECT TRANSACTION_ID, CATEGORY_ID, USER_ID, AMOUNT, NOTE, TRANSACTION_DATE FROM ET_TRANSACTIONS WHERE USER_ID = ? AND CATEGORY_ID = ? AND TRANSACTION_ID = ?";
     private static final String SQL_CREATE = "INSERT INTO ET_TRANSACTIONS (TRANSACTION_ID, CATEGORY_ID, USER_ID, AMOUNT, NOTE, TRANSACTION_DATE) VALUES(NEXTVAL('ET_TRANSACTIONS_SEQ'), ?, ?, ?, ?, ?)";
@@ -26,20 +31,47 @@ public class TransactionRepositoryImpl implements TransactionRepository {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
+    /**
+     * Fetches all transactions for a given user and category.
+     *
+     * @param userId The ID of the user whose transactions are to be fetched.
+     * @param categoryId The ID of the category to which the transactions belong.
+     * @return A list of transactions belonging to the specified user and category.
+     */
     @Override
     public List<Transaction> findAll(Integer userId, Integer categoryId) {
         return jdbcTemplate.query(SQL_FIND_ALL, new Object[]{userId, categoryId}, transactionRowMapper);
     }
 
+    /**
+     * Fetches a specific transaction by user ID, category ID, and transaction ID.
+     *
+     * @param userId The ID of the user to whom the transaction belongs.
+     * @param categoryId The ID of the category to which the transaction belongs.
+     * @param transactionId The ID of the transaction to be fetched.
+     * @return The transaction that matches the specified user ID, category ID, and transaction ID.
+     * @throws EtResourceNotFoundException If the transaction is not found.
+     */
     @Override
     public Transaction findById(Integer userId, Integer categoryId, Integer transactionId) throws EtResourceNotFoundException {
         try {
             return jdbcTemplate.queryForObject(SQL_FIND_BY_ID, new Object[]{userId, categoryId, transactionId}, transactionRowMapper);
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new EtResourceNotFoundException("Transaction not found");
         }
     }
 
+    /**
+     * Creates a new transaction for a given user and category.
+     *
+     * @param userId The ID of the user for whom the transaction is to be created.
+     * @param categoryId The ID of the category to which the transaction belongs.
+     * @param amount The amount of the transaction.
+     * @param note The note for the transaction.
+     * @param transactionDate The date of the transaction.
+     * @return The ID of the newly created transaction.
+     * @throws EtBadRequestException If the request to create the transaction is invalid.
+     */
     @Override
     public Integer create(Integer userId, Integer categoryId, Double amount, String note, Long transactionDate) throws EtBadRequestException {
         try {
@@ -54,27 +86,47 @@ public class TransactionRepositoryImpl implements TransactionRepository {
                 return ps;
             }, keyHolder);
             return (Integer) keyHolder.getKeys().get("TRANSACTION_ID");
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new EtBadRequestException("Invalid request");
         }
     }
 
+    /**
+     * Updates an existing transaction for a given user and category.
+     *
+     * @param userId The ID of the user to whom the transaction belongs.
+     * @param categoryId The ID of the category to which the transaction belongs.
+     * @param transactionId The ID of the transaction to be updated.
+     * @param transaction The transaction object containing the updated details.
+     * @throws EtBadRequestException If the request to update the transaction is invalid.
+     */
     @Override
     public void update(Integer userId, Integer categoryId, Integer transactionId, Transaction transaction) throws EtBadRequestException {
         try {
             jdbcTemplate.update(SQL_UPDATE, new Object[]{transaction.getAmount(), transaction.getNote(), transaction.getTransactionDate(), userId, categoryId, transactionId});
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new EtBadRequestException("Invalid request");
         }
     }
 
+    /**
+     * Removes a transaction by user ID, category ID, and transaction ID.
+     *
+     * @param userId The ID of the user to whom the transaction belongs.
+     * @param categoryId The ID of the category to which the transaction belongs.
+     * @param transactionId The ID of the transaction to be removed.
+     * @throws EtResourceNotFoundException If the transaction is not found.
+     */
     @Override
     public void removeById(Integer userId, Integer categoryId, Integer transactionId) throws EtResourceNotFoundException {
         int count = jdbcTemplate.update(SQL_DELETE, new Object[]{userId, categoryId, transactionId});
-        if(count == 0)
+        if (count == 0)
             throw new EtResourceNotFoundException("Transaction not found");
     }
 
+    /**
+     * Maps a row of the result set to a Transaction object.
+     */
     private RowMapper<Transaction> transactionRowMapper = ((rs, rowNum) -> {
         return new Transaction(rs.getInt("TRANSACTION_ID"),
                 rs.getInt("CATEGORY_ID"),

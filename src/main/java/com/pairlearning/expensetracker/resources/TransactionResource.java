@@ -12,6 +12,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * REST Controller for handling transaction-related requests within a specific category.
+ */
 @RestController
 @RequestMapping("/api/categories/{categoryId}/transactions")
 public class TransactionResource {
@@ -19,6 +22,13 @@ public class TransactionResource {
     @Autowired
     TransactionService transactionService;
 
+    /**
+     * Fetches all transactions for a specific category and authenticated user.
+     *
+     * @param request HttpServletRequest to get the authenticated user's ID.
+     * @param categoryId ID of the category whose transactions are to be fetched.
+     * @return ResponseEntity containing a list of transactions and an HTTP status code.
+     */
     @GetMapping("")
     public ResponseEntity<List<Transaction>> getAllTransactions(HttpServletRequest request,
                                                                 @PathVariable("categoryId") Integer categoryId) {
@@ -27,15 +37,31 @@ public class TransactionResource {
         return new ResponseEntity<>(transactions, HttpStatus.OK);
     }
 
+    /**
+     * Fetches a specific transaction by ID within a category for the authenticated user.
+     *
+     * @param request HttpServletRequest to get the authenticated user's ID.
+     * @param categoryId ID of the category.
+     * @param transactionId ID of the transaction to fetch.
+     * @return ResponseEntity containing the transaction and an HTTP status code.
+     */
     @GetMapping("/{transactionId}")
     public ResponseEntity<Transaction> getTransactionById(HttpServletRequest request,
                                                           @PathVariable("categoryId") Integer categoryId,
                                                           @PathVariable("transactionId") Integer transactionId) {
         int userId = (Integer) request.getAttribute("userId");
-        Transaction transaction = transactionService.fetchTransactionById(userId, categoryId, transactionId);
+        Transaction transaction = transactionService.fetchTransactionById(userId,                                                      categoryId, transactionId);
         return new ResponseEntity<>(transaction, HttpStatus.OK);
     }
 
+    /**
+     * Adds a new transaction to a specific category for the authenticated user.
+     *
+     * @param request HttpServletRequest to get the authenticated user's ID.
+     * @param categoryId ID of the category to add the transaction to.
+     * @param transactionMap Map containing the transaction details.
+     * @return ResponseEntity containing the created transaction and an HTTP status code.
+     */
     @PostMapping("")
     public ResponseEntity<Transaction> addTransaction(HttpServletRequest request,
                                                       @PathVariable("categoryId") Integer categoryId,
@@ -48,7 +74,15 @@ public class TransactionResource {
         return new ResponseEntity<>(transaction, HttpStatus.CREATED);
     }
 
-
+    /**
+     * Updates an existing transaction within a specific category for the authenticated user.
+     *
+     * @param request HttpServletRequest to get the authenticated user's ID.
+     * @param categoryId ID of the category.
+     * @param transactionId ID of the transaction to update.
+     * @param transaction Transaction object containing updated data.
+     * @return ResponseEntity containing a success flag and an HTTP status code.
+     */
     @PutMapping("/{transactionId}")
     public ResponseEntity<Map<String, Boolean>> updateTransaction(HttpServletRequest request,
                                                                   @PathVariable("categoryId") Integer categoryId,
@@ -61,6 +95,14 @@ public class TransactionResource {
         return new ResponseEntity<>(map, HttpStatus.OK);
     }
 
+    /**
+     * Deletes a transaction within a specific category for the authenticated user.
+     *
+     * @param request HttpServletRequest to get the authenticated user's ID.
+     * @param categoryId ID of the category.
+     * @param transactionId ID of the transaction to delete.
+     * @return ResponseEntity containing a success flag and an HTTP status code.
+     */
     @DeleteMapping("/{transactionId}")
     public ResponseEntity<Map<String, Boolean>> deleteTransaction(HttpServletRequest request,
                                                                   @PathVariable("categoryId") Integer categoryId,
@@ -72,3 +114,4 @@ public class TransactionResource {
         return new ResponseEntity<>(map, HttpStatus.OK);
     }
 }
+
