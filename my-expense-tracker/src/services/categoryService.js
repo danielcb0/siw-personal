@@ -1,27 +1,54 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api';
+const API_URL = 'http://localhost:8080/api/categories';
 
 export const getCategories = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) throw new Error('No token found');
-
-    const response = await axios.get(`${API_URL}/categories`, {
+    const response = await axios.get(API_URL, {
         headers: {
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${localStorage.getItem('token')}`
         }
     });
     return response.data;
 };
 
-export const createCategory = async (category) => {
-    const token = localStorage.getItem('token');
-    if (!token) throw new Error('No token found');
-
-    const response = await axios.post(`${API_URL}/categories`, category, {
+export const deleteCategory = async (categoryId) => {
+    await axios.delete(`${API_URL}/${categoryId}`, {
         headers: {
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+    });
+};
+
+export const createCategory = async (title, description) => {
+    const response = await axios.post(API_URL, {
+        title,
+        description
+    }, {
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`
         }
     });
     return response.data;
+};
+
+export const getCategory = async (categoryId) => {
+    const response = await axios.get(`${API_URL}/${categoryId}`, {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+    });
+    return response.data;
+};
+
+export const updateCategory = async (categoryId, title, description) => {
+    await axios.put(`${API_URL}/${categoryId}`, {
+        title,
+        description
+    }, {
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+    });
 };

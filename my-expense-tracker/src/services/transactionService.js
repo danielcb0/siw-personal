@@ -24,6 +24,7 @@ export const createTransaction = async (categoryId, transaction) => {
         transactionDate: new Date(transaction.transactionDate).getTime()
     }, {
         headers: {
+            'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`
         }
     });
@@ -46,8 +47,13 @@ export const updateTransaction = async (categoryId, transactionId, transaction) 
     const token = localStorage.getItem('token');
     if (!token) throw new Error('No token found');
 
-    const response = await axios.put(`${API_URL}/categories/${categoryId}/transactions/${transactionId}`, transaction, {
+    const response = await axios.put(`${API_URL}/categories/${categoryId}/transactions/${transactionId}`, {
+        amount: parseFloat(transaction.amount),
+        note: transaction.note,
+        transactionDate: new Date(transaction.transactionDate).getTime()
+    }, {
         headers: {
+            'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`
         }
     });

@@ -11,12 +11,26 @@ const Header = ({ isLoggedIn, handleLogout }) => {
 
     return (
         <header>
+            <div className="header-title">Expense Tracker</div>
             <nav>
                 <ul>
-                    <li><Link to="/dashboard">Dashboard</Link></li>
-
+                    <li>
+                        <Link to="/dashboard">Dashboard</Link>
+                    </li>
+                    {!isLoggedIn && (
+                        <>
+                            <li>
+                                <Link to="/login">Login</Link>
+                            </li>
+                            <li>
+                                <Link to="/register">Register</Link>
+                            </li>
+                        </>
+                    )}
                     {isLoggedIn && (
-                        <li><button onClick={handleLogoutClick}>Log Out</button></li>
+                        <li>
+                            <button onClick={handleLogoutClick}>Log Out</button>
+                        </li>
                     )}
                 </ul>
             </nav>

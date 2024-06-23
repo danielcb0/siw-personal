@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { createTransaction, getTransactions } from '../services/transactionService';
+import { createTransaction, getTransactions, deleteTransaction, updateTransaction } from '../services/transactionService';
 import { useParams } from 'react-router-dom';
 
 const TransactionList = () => {
     const { categoryId } = useParams();
     const [transactions, setTransactions] = useState([]);
     const [newTransaction, setNewTransaction] = useState({ amount: '', note: '', transactionDate: '' });
+    const [editMode, setEditMode] = useState(false);
+    const [currentTransaction, setCurrentTransaction] = useState(null);
 
     useEffect(() => {
         const fetchTransactions = async () => {
@@ -34,7 +36,40 @@ const TransactionList = () => {
             setTransactions(data);
             setNewTransaction({ amount: '', note: '', transactionDate: '' });
         } catch (error) {
-            console.error(error);
+            console.error('Failed to add transaction', error);
+        }
+    };
+
+    const handleDeleteTransaction = async (transactionId) => {
+        try {
+            await deleteTransaction(categoryId, transactionId);
+            const data = await getTransactions(categoryId);
+            setTransactions(data);
+        } catch (error) {
+            console.error('Failed to delete transaction', error);
+        }
+    };
+
+    const handleEditTransaction = (transaction) => {
+        setCurrentTransaction(transaction);
+        setNewTransaction({
+            amount: transaction.amount,
+            note: transaction.note,
+            transactionDate: new Date(transaction.transactionDate).toISOString().split('T')[0]
+        });
+        setEditMode(true);
+    };
+
+    const handleUpdateTransaction = async () => {
+        try {
+            await updateTransaction(categoryId, currentTransaction.transactionId, newTransaction);
+            const data = await getTransactions(categoryId);
+            setTransactions(data);
+            setNewTransaction({ amount: '', note: '', transactionDate: '' });
+            setEditMode(false);
+            setCurrentTransaction(null);
+        } catch (error) {
+            console.error('Failed to update transaction', error);
         }
     };
 
@@ -45,10 +80,12 @@ const TransactionList = () => {
                 {transactions.map(transaction => (
                     <li key={transaction.transactionId}>
                         Amount: {transaction.amount}, Note: {transaction.note}, Date: {new Date(transaction.transactionDate).toLocaleDateString()}
+                        <button onClick={() => handleEditTransaction(transaction)}>Edit</button>
+                        <button onClick={() => handleDeleteTransaction(transaction.transactionId)}>Delete</button>
                     </li>
                 ))}
             </ul>
-            <h3>Add Transaction</h3>
+            <h3>{editMode ? 'Edit Transaction' : 'Add Transaction'}</h3>
             <input
                 type="number"
                 name="amount"
@@ -72,7 +109,9 @@ const TransactionList = () => {
                 onChange={handleChange}
                 required
             />
-            <button onClick={handleAddTransaction}>Add Transaction</button>
+            <button onClick={editMode ? handleUpdateTransaction : handleAddTransaction}>
+                {editMode ? 'Update Transaction' : 'Add Transaction'}
+            </button>
         </div>
     );
 };
