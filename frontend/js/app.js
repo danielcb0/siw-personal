@@ -11,15 +11,15 @@ async function login() {
             body: JSON.stringify({ email, password })
         });
 
-        const data = await response.json();
+        const user = await response.json();
         if (response.ok) {
-            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(user));
             document.getElementById('login-form').style.display = 'none';
             document.getElementById('register-form').style.display = 'none';
             document.getElementById('content').style.display = 'block';
             fetchCategories();
         } else {
-            alert('Login failed: ' + data.message);
+            alert('Login failed: ' + user.message);
         }
     } catch (error) {
         alert('Login failed: ' + error.message);
@@ -41,15 +41,15 @@ async function register() {
             body: JSON.stringify({ firstName, lastName, email, password })
         });
 
-        const data = await response.json();
+        const user = await response.json();
         if (response.ok) {
-            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(user));
             document.getElementById('login-form').style.display = 'none';
             document.getElementById('register-form').style.display = 'none';
             document.getElementById('content').style.display = 'block';
             fetchCategories();
         } else {
-            alert('Registration failed: ' + data.message);
+            alert('Registration failed: ' + user.message);
         }
     } catch (error) {
         alert('Registration failed: ' + error.message);
@@ -57,13 +57,16 @@ async function register() {
 }
 
 async function fetchCategories() {
-    const token = localStorage.getItem('token');
+    if (!localStorage.getItem('user')) {
+        alert('You are not logged in.');
+        return;
+    }
 
     try {
         const response = await fetch('http://localhost:8080/api/categories', {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${token}`
+                'Content-Type': 'application/json'
             }
         });
 
@@ -89,7 +92,11 @@ async function fetchCategories() {
 }
 
 async function addCategory() {
-    const token = localStorage.getItem('token');
+    if (!localStorage.getItem('user')) {
+        alert('You are not logged in.');
+        return;
+    }
+
     const title = document.getElementById('categoryTitle').value;
     const description = document.getElementById('categoryDescription').value;
 
@@ -97,8 +104,7 @@ async function addCategory() {
         const response = await fetch('http://localhost:8080/api/categories', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({ title, description })
         });
@@ -115,14 +121,18 @@ async function addCategory() {
 }
 
 async function fetchTransactions() {
-    const token = localStorage.getItem('token');
+    if (!localStorage.getItem('user')) {
+        alert('You are not logged in.');
+        return;
+    }
+
     const categoryId = document.getElementById('categorySelect').value;
 
     try {
         const response = await fetch(`http://localhost:8080/api/categories/${categoryId}/transactions`, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${token}`
+                'Content-Type': 'application/json'
             }
         });
 
@@ -141,7 +151,11 @@ async function fetchTransactions() {
 }
 
 async function addTransaction() {
-    const token = localStorage.getItem('token');
+    if (!localStorage.getItem('user')) {
+        alert('You are not logged in.');
+        return;
+    }
+
     const categoryId = document.getElementById('categorySelect').value;
     const amount = document.getElementById('transactionAmount').value;
     const note = document.getElementById('transactionNote').value;
@@ -151,8 +165,7 @@ async function addTransaction() {
         const response = await fetch(`http://localhost:8080/api/categories/${categoryId}/transactions`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({ amount, note, transactionDate })
         });

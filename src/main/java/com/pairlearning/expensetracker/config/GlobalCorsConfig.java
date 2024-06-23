@@ -14,10 +14,10 @@ public class GlobalCorsConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.addAllowedOrigin("http://localhost:8080"); // Permitir localhost
+        config.addAllowedOrigin("http://localhost:3000"); // Permitir el frontend
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
-        source.registerCorsConfiguration("/**", config); // Asegúrate de que esto cubra todas las rutas
+        source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
 }

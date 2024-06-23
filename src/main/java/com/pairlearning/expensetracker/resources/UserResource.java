@@ -39,11 +39,6 @@ public class UserResource {
         return new ResponseEntity<>(generateJWTToken(user), HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.OPTIONS, value = "/**")
-    public ResponseEntity handle() {
-        return new ResponseEntity(HttpStatus.OK);
-    }
-
     private Map<String, String> generateJWTToken(User user) {
         long timestamp = System.currentTimeMillis();
         String token = Jwts.builder().signWith(SignatureAlgorithm.HS256, Constants.API_SECRET_KEY)

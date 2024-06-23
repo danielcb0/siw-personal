@@ -43,10 +43,11 @@ public class TransactionResource {
         int userId = (Integer) request.getAttribute("userId");
         Double amount = Double.valueOf(transactionMap.get("amount").toString());
         String note = (String) transactionMap.get("note");
-        Long transactionDate = (Long) transactionMap.get("transactionDate");
+        Long transactionDate = Long.valueOf(transactionMap.get("transactionDate").toString());
         Transaction transaction = transactionService.addTransaction(userId, categoryId, amount, note, transactionDate);
         return new ResponseEntity<>(transaction, HttpStatus.CREATED);
     }
+
 
     @PutMapping("/{transactionId}")
     public ResponseEntity<Map<String, Boolean>> updateTransaction(HttpServletRequest request,
